@@ -36,8 +36,8 @@
         function link(scope, element, attrs) {
         }
     }
-    DummyController.$inject = ['$rootScope', '$scope', '$filter', 'OHService'];
-    function DummyController ($rootScope, $scope, $filter, OHService) {
+    DummyController.$inject = ['$rootScope', '$scope', '$filter', 'OHService', 'PersistenceService', '$window'];
+    function DummyController ($rootScope, $scope, $filter, OHService, PersistenceService, $window) {
         var vm = this;
         this.widget = this.ngModel;
 
@@ -65,8 +65,30 @@
             updateValue();
         });
 
-    }
+        $scope.dashboards = PersistenceService.getDashboards();
 
+        $scope.on_click = function () {
+            if (!vm.widget.link)
+                return;
+
+            switch (vm.widget.link_target) {
+                case 'new_tab':
+                    var w = $window.open(vm.widget.link);
+                    w && (w.opener = null);
+                    break;
+
+                case 'new_window':
+                    var w = $window.open(vm.widget.link, "_blank", "resizable=1", true);
+                    w && (w.opener = null);
+                    break;
+                    
+                default:
+                case 'self':
+                    $window.location.href = vm.widget.link
+                    break;
+            }
+        }
+    }
 
     // settings dialog
     WidgetSettingsCtrlDummy.$inject = ['$scope', '$timeout', '$rootScope', '$uibModalInstance', 'widget', 'OHService'];
@@ -96,7 +118,9 @@
             icon             : widget.icon,
             icon_size        : widget.icon_size,
             icon_nolinebreak : widget.icon_nolinebreak,
-            icon_replacestext: widget.icon_replacestext
+            icon_replacestext: widget.icon_replacestext,
+            link             : widget.link,
+            link_target      : widget.link_target || 'self'
         };
 
         $scope.dismiss = function() {
