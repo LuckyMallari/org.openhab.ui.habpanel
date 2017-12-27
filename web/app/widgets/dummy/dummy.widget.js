@@ -36,8 +36,8 @@
         function link(scope, element, attrs) {
         }
     }
-    DummyController.$inject = ['$rootScope', '$scope', '$filter', 'OHService', 'PersistenceService', '$window'];
-    function DummyController ($rootScope, $scope, $filter, OHService, PersistenceService, $window) {
+    DummyController.$inject = ['$rootScope', '$scope', '$filter', 'OHService', 'PersistenceService', '$window', '$location'];
+    function DummyController ($rootScope, $scope, $filter, OHService, PersistenceService, $window, $location) {
         var vm = this;
         this.widget = this.ngModel;
 
@@ -71,7 +71,11 @@
             if (!vm.widget.link)
                 return;
 
-            switch (vm.widget.link_target) {
+            var link_target = vm.widget.link_target;
+            if (vm.widget.link_type == 'dashboard')
+                link_target = 'self';
+
+            switch (link_target) {
                 case 'new_tab':
                     var w = $window.open(vm.widget.link);
                     w && (w.opener = null);
@@ -84,7 +88,10 @@
                     
                 default:
                 case 'self':
-                    $window.location.href = vm.widget.link
+                    if (vm.widget.link_type === 'dashboard')
+                        $location.url(vm.widget.link);
+                    else
+                        $window.location.href = vm.widget.link
                     break;
             }
         }
@@ -120,7 +127,8 @@
             icon_nolinebreak : widget.icon_nolinebreak,
             icon_replacestext: widget.icon_replacestext,
             link             : widget.link,
-            link_target      : widget.link_target || 'self'
+            link_target      : widget.link_target || 'self',
+            link_type        : widget.link_type || 'url'
         };
 
         $scope.dismiss = function() {

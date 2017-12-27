@@ -102,12 +102,31 @@
 
             <div class="form-group" ng-class="{error: _form.link.$error && _form.submitted}">
                 <label class="control-label col-lg-3 col-md-3">Link</label>
-                <div class="col-xs-7">
-                    <input name="link" ng-model="form.link" class="form-control" />
+                <div class="col-xs-9">
+                    <div>
+                        <label class="radio-inline">
+                            <input type="radio" ng-model="form.link_type" value="dashboard" name="link_type" checked/> dashboard
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" ng-model="form.link_type" value="url" name="link_type" /> URL
+                        </label>
+                    </div>
+                    <div>
+                        <input ng-if="form.link_type=='url'" name="link" ng-model="form.link" class="form-control" />
+                        <ui-select ng-if="form.link_type=='dashboard'" ng-model="form.link" theme="selectize" title="Choose a HABPanel dashboard">
+                            <ui-select-match placeholder="Search or select an HABPanel dashboard">{{$select.selected.name}}</ui-select-match>
+                            <ui-select-choices repeat="('/view/' + dashboard.id) as dashboard in dashboards | filter: $select.search">
+                                <div>
+                                    <span ng-bind-html="dashboard.name | highlight: $select.search">
+                                </div>
+                                <small ng-bind-html="dashboard.label | highlight: $select.search"></small>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group" ng-if="form.link" ng-class="{error: _form.link_target.$error && _form.submitted}">
+            <div class="form-group" ng-if="form.link && form.link_type=='url'" ng-class="{error: _form.link_target.$error && _form.submitted}">
                 <label class="control-label col-lg-3 col-md-3">Link Target</label>
                 <div class="col-lg-9 col-md-9">
                     <label class="radio-inline">
